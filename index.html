@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,6 +16,7 @@
       overflow: hidden;
     }
 
+    /* THE BOOTH (The Machine) */
     .booth {
       width: 90%;
       max-width: 360px;
@@ -25,6 +26,8 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       text-align: center;
       position: relative;
+      /* IMPORTANT: This keeps the booth ON TOP of the photo */
+      z-index: 10; 
     }
 
     .screen {
@@ -34,61 +37,80 @@
       border-radius: 12px;
       color: #0f0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 15px;
       font-size: 18px;
       box-sizing: border-box;
-    }
-
-    .screen img {
-      width: 100%;
-      display: none;
-      border-radius: 8px;
+      border: 4px solid #333;
     }
 
     button {
-      margin-top: 15px;
+      margin-top: 20px;
       background: #ff4d88;
       border: none;
       color: white;
-      padding: 12px 22px;
+      padding: 12px 25px;
       border-radius: 30px;
-      font-size: 16px;
+      font-size: 18px;
       cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(255, 77, 136, 0.4);
+    }
+    
+    button:hover {
+        transform: scale(1.05);
     }
 
     .slot {
       width: 70%;
-      height: 10px;
-      background: #333;
-      margin: 15px auto;
-      border-radius: 5px;
+      height: 15px;
+      background: #222;
+      margin: 20px auto 10px auto;
+      border-radius: 10px;
+      border-bottom: 2px solid #555;
     }
 
+    /* THE PHOTO (The Print) */
     .print {
       position: absolute;
-      bottom: -260px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 75%;
-      transition: 3s ease-out;
+      width: 80%; /* Width of the photo relative to booth */
+      left: 10%;  /* Centers the photo (10% on left, 10% on right) */
+      
+      /* START POSITION: Hidden behind the booth */
+      top: 50%; 
+      z-index: -1; /* Creates the layering effect */
+      
+      /* Initial state */
+      opacity: 0;
+      transition: top 2.5s ease-out, opacity 0.5s ease-in;
+      
+      /* Styling the photo */
+      border: 5px solid white;
+      border-bottom: 25px solid white; /* Polaroid style bottom */
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      border-radius: 2px;
     }
 
+    /* ANIMATION END POSITION */
     .print.show {
-      bottom: -30px;
+      opacity: 1;
+      top: 95%; /* Slides down to hang off the bottom */
     }
 
+    /* FLOATING HEARTS */
     .heart {
       position: absolute;
-      font-size: 22px;
+      font-size: 25px;
       animation: float 4s linear forwards;
       pointer-events: none;
+      z-index: 100;
     }
 
     @keyframes float {
-      0% { transform: translateY(0); opacity: 1; }
-      100% { transform: translateY(-100vh); opacity: 0; }
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
@@ -96,13 +118,14 @@
 
   <div class="booth">
     <div class="screen" id="screen">
-      Hiii Zarinn!!<br><br>
-      Here's a little surprise for you!!
+      <div>Hiii Zarinn!!</div>
+      <div style="font-size:14px; margin-top:10px; color:#ccc;">Here's a surprise!</div>
     </div>
 
-    <button id="startBtn" onclick="startBooth()">Start</button>
+    <button id="startBtn" onclick="startBooth()">Start Photo</button>
 
     <div class="slot"></div>
+    
     <img id="print" class="print" src="photo.jpg">
   </div>
 
@@ -110,41 +133,57 @@
     function startBooth() {
       const screen = document.getElementById("screen");
       const btn = document.getElementById("startBtn");
-      btn.style.display = "none";
+      
+      btn.style.display = "none"; // Hide button
 
       let count = 3;
-      screen.innerHTML = "Get ready...<br><br>" + count;
+      screen.innerHTML = "<h1 style='font-size:60px'>" + count + "</h1>";
 
       const interval = setInterval(() => {
         count--;
         if (count > 0) {
-          screen.innerHTML = "Get ready...<br><br>" + count;
+          screen.innerHTML = "<h1 style='font-size:60px'>" + count + "</h1>";
         } else {
           clearInterval(interval);
-          screen.innerHTML = "Printing your photo...";
-          printPhoto();
+          screen.innerHTML = "<div>Printing...</div>";
+          
+          // Wait a tiny bit then print
+          setTimeout(printPhoto, 500);
         }
       }, 1000);
     }
 
     function printPhoto() {
       const print = document.getElementById("print");
-      setTimeout(() => {
-        print.classList.add("show");
-        createHearts();
-      }, 800);
+      const screen = document.getElementById("screen");
+      
+      screen.innerHTML = "<div style='color:#ff4d88'>Printed!</div>";
+      
+      // This triggers the CSS slide animation
+      print.classList.add("show");
+      
+      // Start hearts
+      createHearts();
     }
 
     function createHearts() {
-      for (let i = 0; i < 25; i++) {
+      let heartCount = 0;
+      const interval = setInterval(() => {
+        if(heartCount > 20) {
+            clearInterval(interval);
+            return;
+        }
+        
         let heart = document.createElement("div");
         heart.innerHTML = "💗";
         heart.className = "heart";
         heart.style.left = Math.random() * 100 + "vw";
         heart.style.top = "100vh";
         document.body.appendChild(heart);
+        
         setTimeout(() => heart.remove(), 4000);
-      }
+        heartCount++;
+      }, 200);
     }
   </script>
 
